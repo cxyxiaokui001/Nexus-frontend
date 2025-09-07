@@ -1,9 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
-import UserRegisterView from '@/views/user/UserRegisterView.vue'
 import UserLoginView from '@/views/user/UserLoginView.vue'
+import UserRegisterView from '@/views/user/UserRegisterView.vue'
 import UserManageView from '@/views/admin/UserManageView.vue'
-import ACCESS_ENUM from '@/access/accessEnum.ts'
+import AppManageView from '@/views/admin/AppManageView.vue'
+import AppChatView from '@/views/app/AppChatView.vue'
+import AppEditView from '@/views/app/AppEditView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -27,13 +29,23 @@ const router = createRouter({
       path: '/admin/userManage',
       name: '用户管理',
       component: UserManageView,
-      meta: {
-        access: ACCESS_ENUM.ADMIN,
-      }
+    },
+    {
+      path: '/admin/appManage',
+      name: '应用管理',
+      component: AppManageView,
+    },
+    {
+      path: '/app/chat/:id',
+      name: '应用对话',
+      component: AppChatView,
+    },
+    {
+      path: '/app/edit/:id',
+      name: '编辑应用',
+      component: AppEditView,
     },
   ],
-
 })
 
 export default router
-

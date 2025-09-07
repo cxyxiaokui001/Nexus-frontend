@@ -49,15 +49,13 @@
 
 <script setup lang="ts">
 import { computed, h, ref } from 'vue'
-import { type RouteRecordRaw, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { type MenuProps, message } from 'ant-design-vue'
 import { useLoginUserStore } from '@/stores/loginUser.ts'
-import { LogoutOutlined } from '@ant-design/icons-vue'
 import { userLogout } from '@/api/userController.ts'
-import checkAccess from '@/access/checkAccess.ts'
+import { LogoutOutlined, HomeOutlined } from '@ant-design/icons-vue'
 
 const loginUserStore = useLoginUserStore()
-
 const router = useRouter()
 // 当前选中菜单
 const selectedKeys = ref<string[]>(['/'])
@@ -70,45 +68,34 @@ router.afterEach((to, from, next) => {
 const originItems = [
   {
     key: '/',
-    /*icon: () => h(HomeOutlined),*/
+    icon: () => h(HomeOutlined),
     label: '主页',
     title: '主页',
-  },
-  {
-    key: '/about',
-    label: '关于',
-    title: '关于',
   },
   {
     key: '/admin/userManage',
     label: '用户管理',
     title: '用户管理',
   },
+  {
+    key: '/admin/appManage',
+    label: '应用管理',
+    title: '应用管理',
+  },
 ]
 
 // 过滤菜单项
 const filterMenus = (menus = [] as MenuProps['items']) => {
   return menus?.filter((menu) => {
-    const item = menuToRouteItem(menu)
-    if (item.meta?.hideInMenu) {
-      return false
+    const menuKey = menu?.key as string
+    if (menuKey?.startsWith('/admin')) {
+      const loginUser = loginUserStore.loginUser
+      if (!loginUser || loginUser.userRole !== 'admin') {
+        return false
+      }
     }
-    // 根据权限过滤菜单，有权限则返回 true，则保留该菜单
-    return checkAccess(loginUserStore.loginUser, item.meta?.access as string)
+    return true
   })
-}
-// 将菜单项转换为路由项
-const menuToRouteItem = (menu: any) => {
-  // 根据菜单key查找对应的路由配置
-  const route = (router.options.routes as RouteRecordRaw[]).find((r: RouteRecordRaw) => r.path === menu.key)
-
-  return {
-    path: menu.key,
-    meta: {
-      access: route?.meta?.access,
-      hideInMenu: menu.hideInMenu,
-    },
-  }
 }
 
 // 展示在菜单的路由数组
@@ -124,7 +111,7 @@ const handleMenuClick: MenuProps['onClick'] = (e) => {
   }
 }
 
-// 用户注销
+// 退出登录
 const doLogout = async () => {
   const res = await userLogout()
   if (res.data.code === 0) {
